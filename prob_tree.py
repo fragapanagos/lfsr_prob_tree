@@ -95,7 +95,7 @@ class ProbTree(object):
             sum_right = self._build_node(w, 2*i + 1)
 
             p_left = sum_left/(sum_right + sum_left)
-            self.tree[i] = AsBBit(p_left, self.w_nbits) / 2**self.w_nbits
+            self.tree[i] = AsBBit(p_left, self.w_nbits)
 
             return sum_left + sum_right
         else:
@@ -107,9 +107,12 @@ class ProbTree(object):
         len_w = self.tree.shape[0]
 
         while i < len_w:
-            r = float(self.lfsr.sample(self.w_nbits))/2**self.w_nbits
-            #r = np.random.uniform()
-            if r < self.tree[i]:
+            r = self.lfsr.sample(self.w_nbits)
+            #r = np.random.uniform() * 2**w_nbits-1
+
+            if self.tree[i] == 2**w_nbits-1
+                i = i*2
+            elif r < self.tree[i]:
                 i = i*2
             else:
                 i = i*2 + 1
