@@ -18,6 +18,7 @@ def AsBBit(x, B):
     rem = scaled_x - np.floor(scaled_x)
 
     if (x == 1):
+        x_bin = M - 1
     elif (scaled_x > M - 2):
         # in this range, things are ugly
         # because we reserve 'all ones' as 'always go left'
