@@ -6,18 +6,36 @@ def AsBBit(x, B):
     """Converts a probability to a B-bit representation
 
     Rounds probabilistically
-    """
-    assert x < 1, "it's a probability"
-    M = 2**B
+    Treats '111..1' as special code for "always go left"
+    This means that the probability M-1/M is essentially
+    unimplementable. The rounding for values in the range
+    (M-2/M, 1) chooses between M-2/M and 1.
 
+    """
+    assert x <= 1, "it's a probability"
+    M = 2**B
     scaled_x = x*M
     rem = scaled_x - np.floor(scaled_x)
 
-    r = np.random.rand()
-    if (r < rem):
-        return np.floor(scaled_x)
+    if (x == 1):
+    elif (scaled_x > M - 2):
+        # in this range, things are ugly
+        # because we reserve 'all ones' as 'always go left'
+        r = np.random.rand()
+        if (2 * r < scaled_x - M - 2):
+            x_bin =  M - 1
+        else:
+            x_bin = M
+        
     else:
-        return np.floor(scaled_x) + 1
+        r = np.random.rand()
+        if (r < rem):
+            x_bin = np.floor(scaled_x)
+        else:
+            x_bin =  np.floor(scaled_x) + 1
+
+    assert x_bin < M, "exceeded bit width"
+    return x_bin
 
 
 def extract_distribution(ptree):
