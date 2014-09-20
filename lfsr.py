@@ -21,7 +21,20 @@ class LFSR(object):
         17: (17, 14),
         18: (18, 11),
         19: (19, 18, 17, 14),
+        20: (20, 17),
+        21: (21, 19),
+        22: (22, 21),
+        23: (23, 18),
+        24: (24, 23, 22, 17),
+        25: (25, 22),
+        26: (26, 6, 2, 1),
+        27: (27, 5, 2, 1),
+        28: (28, 25),
+        29: (29, 27),
+        30: (30, 6, 4, 1),
+        31: (31, 28),
         32: (32, 22, 2, 1),
+        64: (64, 63, 61, 60),
     }
 
     def __init__(self, nbits, seed, taps=None):
@@ -32,8 +45,11 @@ class LFSR(object):
         assert seed != 0, "seed must be nonzero"
         self.state = seed
 
-    def sample(self, nbits):
-        for i in xrange(np.random.randint(1, 5)):
+    def sample(self, nbits, rand_rolls=False):
+        if rand_rolls:
+            for i in xrange(np.random.randint(1, 7)):
+                state = self._step()
+        else:
             state = self._step()
         mask = 2**nbits-1
         return state & mask
@@ -51,7 +67,7 @@ class LFSR(object):
         """test that the lfsr taps produces a maximum length sequence"""
         seed = self.state
         ctr = 1
-        while self.sample() != seed:
+        while self.sample(self.nbits) != seed:
             ctr += 1
         assert ctr == 2**self.nbits-1, \
             "lfsr does not produce maximum length sequence. Produces " + \
@@ -63,14 +79,15 @@ def collect_lfsr_sequence(nbits, seed=0b00000001):
     lfsr = LFSR(nbits, seed)
     states = []
     for i in xrange(2**nbits-1):
-        states.append(lfsr.sample())
+        states.append(lfsr.sample(nbits, rand_rolls=True))
     states = np.array(states)
     return states
 
 
 def test_lfsr():
     """test that lfsr produces maximum length sequences"""
-    for nbits in xrange(2, 20):
+    for nbits in LFSR.taps:
+        print 'checking max length sequence for %d taps' % nbits
         lfsr = LFSR(nbits, 0b00000001)
         lfsr.test()
 
@@ -108,4 +125,6 @@ import pytest
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, '-v'])
+    test_lfsr()
+    #pytest.main([__file__, '-v'])
+    #lfsr_autocorrelation()

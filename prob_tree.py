@@ -24,9 +24,9 @@ def AsBBit(x, B):
         # because we reserve 'all ones' as 'always go left'
         r = np.random.rand()
         if (2 * r < scaled_x - M - 2):
-            x_bin =  M - 1
+            x_bin =  M - 2
         else:
-            x_bin = M
+            x_bin = M - 1
         
     else:
         r = np.random.rand()
@@ -70,7 +70,7 @@ class ProbTree(object):
     def __init__(self, w_nbits, lfsr_nbits, lfsr_seed=0b1, w_dist=None):
         self.w_nbits = w_nbits
         self.lfsr_nbits = lfsr_nbits
-        self.lfsr = LFSR(lfsr_nbits, lfsr_seed)
+        #self.lfsr = LFSR(lfsr_nbits, lfsr_seed)
 
         if w_dist is not None:
             self.build_tree(w_dist)
@@ -90,6 +90,12 @@ class ProbTree(object):
         self._build_node(w_abs, 1)
         self.w_apx = extract_distribution(self.tree)
 
+        n_levels = np.ceil(np.log2(len(w)))
+        self.lfsr = []
+        for n in range(int(n_levels)):
+            seed = np.random.randint(1, int(2**(self.lfsr_nbits-n)-1))
+            self.lfsr.append(LFSR(self.lfsr_nbits-n, seed))
+
     def _build_node(self, w, i):
         if (i < len(w)):
             sum_left = self._build_node(w, 2*i)
@@ -105,16 +111,18 @@ class ProbTree(object):
     def sample(self):
         assert self.tree is not None, "must build tree from distribution first"
         i = 1
+        layer = 0
         len_w = self.tree.shape[0]
 
         while i < len_w:
-            r = self.lfsr.sample(self.w_nbits)
+            r = self.lfsr[layer].sample(self.w_nbits)
             #r = np.random.uniform() * 2**w_nbits-1
 
-            if self.tree[i] == 2**w_nbits-1
+            if self.tree[i] == 2**self.w_nbits-1:
                 i = i*2
             elif r < self.tree[i]:
                 i = i*2
             else:
                 i = i*2 + 1
+            layer += 1
         return i-len_w
