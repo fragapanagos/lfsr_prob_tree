@@ -86,7 +86,7 @@ def collect_lfsr_sequence(nbits, seed=0b00000001):
 
 def test_lfsr():
     """test that lfsr produces maximum length sequences"""
-    for nbits in LFSR.taps:
+    for nbits in xrange(2, 21):
         print 'checking max length sequence for %d taps' % nbits
         lfsr = LFSR(nbits, 0b00000001)
         lfsr.test()
